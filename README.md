@@ -5,6 +5,7 @@ This project aims to implement Task Scheduling using the Critical Path Method (C
 ## Features
 
 - Calculation of earliest start time (ES), earliest finish time (EF), latest start time (LS), latest finish time (LF) for each task.
+- Support for dependency types (SS,SF,FF,FS) and dependency lag.
 - Identification of critical path(s) in the project.
 - Visualization of the project schedule.
 - Algorithm is done using PHP
