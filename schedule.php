@@ -60,10 +60,12 @@ $tasks = [
     ];
 
 
+
 $taskIdToIndex = [];
 $maxPS = 0;
 foreach ($tasks as $index => $task) {
     $tasks[$index]['successors']=[];
+    $tasks[$index]['ff']=0;
     $taskIdToIndex[$task['id']] = $index;
 }
 
@@ -131,11 +133,13 @@ for ($i = $lastTaskIndex; $i >= 0; $i--) {
 
     $task['LF'] = $maxPS;
     $task['LS'] = $task['LF'] - $task['duration'];
-
+    $task['float'] = $task['LS'] - $task['ES'];
   // echo print_r($task);
   } else {
     $minLF = PHP_INT_MAX;
     $minLS = PHP_INT_MAX;
+    $maxES = PHP_INT_MAX;
+    $maxEF = PHP_INT_MAX;
     foreach ($task['successors'] as $k => $successorData) {
       $successorId = $successorData['id']; 
       $keyIndex = $successorData['key']; 
@@ -144,37 +148,41 @@ for ($i = $lastTaskIndex; $i >= 0; $i--) {
       $offset = $successor['offset'][$keyIndex];
 
       switch ($relationship) {
-                case 'ss': // Start-to-Start
-                    $minLS = min($minLS, $successor['LS'] - $offset);
-                    $task['LS'] = $minLS ;
-                    $task['LF'] = $minLF = $task['LS'] + $task['duration'];
+                 case 'ss': // Start-to-Start
+                    $minLF = min($minLF, $successor['LS'] - $offset);
+                    $maxES = min($maxES,$successor['ES'] - $offset);
+                    $task['LF'] = $minLF ;
+                    $task['LS'] = $minLS = $task['LF'] - $task['duration'];
+                    $task['float'] = $maxES - $task['EF'];
+
                     break;
                 case 'sf': // Start-to-Finish
                     $minLS = min($minLF, $successor['LF'] - $offset);
                     $task['LS'] = $minLS ;
-                    $task['LF'] = $minLF = $task['LS'] + $task['duration'];
+                    $task['LF'] = $minLF = $task['LS'] - $task['duration'];
+                    $task['float'] = $task['LS'] - $task['ES'];
                     break;
                 case 'ff': // Finish-to-Finish
                     $minLF = min($minLF, $successor['LF'] - $offset);
+                    $maxEF = min($maxEF,$successor['EF'] - $offset);
                     $task['LF'] = $minLF;
                     $task['LS'] = $minLS = $task['LF'] - $task['duration'];
+                    $task['float'] = $maxEF - $task['EF'];
                     break;
                 case 'fs': // Finish-to-Start
                     $minLF = min($minLF, $successor['LS'] - $offset);
                     $task['LF'] = $minLF;
                     $task['LS'] = $minLS = $task['LF'] - $task['duration'];
+                    $task['float'] = $task['LS'] - $task['ES'];
                     break;
         }
       //$minEF = min($minEF, $successor['LS']); // Use LF of predecessors
     }
   }
-  $task['float'] = $task['LF'] - $task['EF'];
-  $task['isCritical'] = ((int)$task['float'] == 0); // Adjust epsilon if needed
+  $task['isCritical'] = ((int)$task['float'] <= 0); // Adjust epsilon if needed
  
 }
 
-// Set the last task as critical if its float is 0
-//$lastTask['isCritical'] = ($task['float'] == 0);
 
 // Printing
 echo "task id, task name, duration, ES, EF, LS, LF, float, isCritical\n";
@@ -183,4 +191,3 @@ foreach ($tasks as $task) {
     echo "{$task['id']}, {$task['name']}, {$task['duration']}, {$task['ES']}, {$task['EF']}, {$task['LS']}, {$task['LF']}, {$task['float']}, {$isCritical}\n";
 }
 
-?>
