@@ -85,7 +85,7 @@ foreach ($tasks as $key => &$task) {
 
             switch ($relationship) {
                 case 'ss': // Start-to-Start
-                    $maxES = max($maxES, $dependency['ES'] + $offset);
+                    $maxES = max($maxES, $dependency['EF'] + $offset);
                     $task['ES'] = $maxES;
                     $task['EF'] = $maxEF = $task['ES'] + $task['duration'];
                     break;
