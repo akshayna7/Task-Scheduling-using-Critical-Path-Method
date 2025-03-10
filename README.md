@@ -14,7 +14,7 @@ This project aims to implement Task Scheduling using the Critical Path Method (C
 
 To use this project, follow these steps:
 
-1. Clone the repository:
+1. Clone the repository :
 
 ```bash
 git clone https://github.com/akshayna7/Task-Scheduling-using-Critical-Path-Method.git
